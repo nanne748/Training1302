@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Demo editoriale di un diario di allenamento total body con salvataggio locale.">
+    <title>Total Body Training Log</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-slate-50 font-sans text-slate-900 antialiased">
+    <header class="border-b border-slate-200 bg-white">
+        <div class="mx-auto flex max-w-7xl flex-col gap-5 px-4 py-6 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
+            <div>
+                <div class="mb-2 inline-flex items-center gap-2 rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-indigo-700">
+                    <svg class="h-4 w-4" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6.5 6.5h11m-11 11h11M4 9v6m16-6v6M2 10v4m20-4v4"/>
+                    </svg>
+                    Diario dimostrativo
+                </div>
+                <h1 class="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">Total Body Training Log</h1>
+                <p class="mt-1 text-sm text-slate-600 sm:text-base">Demo editoriale – AI in ambienti sportivi</p>
+            </div>
+            <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 lg:max-w-sm">
+                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Ultima sessione salvata</p>
+                <p id="lastSavedIndicator" class="mt-1 text-sm font-semibold text-slate-900">Nessuna sessione salvata</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
+        <section aria-labelledby="safety-title" class="rounded-2xl border border-amber-200 bg-amber-50 p-4 shadow-sm sm:p-5">
+            <div class="flex items-start gap-3">
+                <svg class="mt-0.5 h-6 w-6 shrink-0 text-amber-700" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v4m0 4h.01M10.3 3.7 2.7 17a2 2 0 0 0 1.7 3h15.2a2 2 0 0 0 1.7-3L13.7 3.7a2 2 0 0 0-3.4 0Z"/>
+                </svg>
+                <div>
+                    <h2 id="safety-title" class="font-bold text-amber-950">Avvertenza importante</h2>
+                    <p class="mt-1 text-sm leading-6 text-amber-900">
+                        Contenuto dimostrativo e informativo: non sostituisce una valutazione medica o la programmazione di un professionista qualificato.
+                        Interrompi l’attività in caso di dolore, capogiri o altri sintomi anomali.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section aria-labelledby="profile-title" class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h2 id="profile-title" class="text-lg font-bold text-slate-950">Profilo dimostrativo</h2>
+                    <p class="mt-1 text-sm text-slate-600">Contesto editoriale usato per presentare la scheda.</p>
+                </div>
+                <div class="flex flex-wrap gap-2 text-sm">
+                    <span class="rounded-full bg-blue-50 px-3 py-1.5 font-medium text-blue-800">Uomo, 28 anni</span>
+                    <span class="rounded-full bg-emerald-50 px-3 py-1.5 font-medium text-emerald-800">Nessun infortunio dichiarato</span>
+                    <span class="rounded-full bg-indigo-50 px-3 py-1.5 font-medium text-indigo-800">Livello medio-basso</span>
+                </div>
+            </div>
+        </section>
+
+        <section aria-labelledby="session-title" class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div class="border-b border-slate-200 p-5 sm:p-6">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                        <h2 id="session-title" class="text-xl font-bold text-slate-950">Dati della sessione</h2>
+                        <p class="mt-1 text-sm text-slate-600">Compila i dati essenziali prima o dopo l’allenamento.</p>
+                    </div>
+                    <div id="sessionStatus" class="inline-flex w-fit items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 text-sm font-semibold text-slate-700">
+                        <span class="h-2 w-2 rounded-full bg-slate-400"></span>
+                        Non avviata
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid gap-5 p-5 sm:grid-cols-2 sm:p-6 lg:grid-cols-4">
+                <div>
+                    <label for="sessionDate" class="mb-2 block text-sm font-semibold text-slate-700">Data <span class="text-red-600">*</span></label>
+                    <input id="sessionDate" type="date" required class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100">
+                </div>
+                <div>
+                    <label for="sessionDuration" class="mb-2 block text-sm font-semibold text-slate-700">Durata opzionale</label>
+                    <div class="relative">
+                        <input id="sessionDuration" type="number" min="0" step="1" inputmode="numeric" placeholder="Es. 55" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 pr-16 text-sm shadow-sm outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100">
+                        <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm text-slate-500">minuti</span>
+                    </div>
+                </div>
+                <fieldset class="sm:col-span-2">
+                    <legend class="mb-2 block text-sm font-semibold text-slate-700">Energia prima dell’allenamento</legend>
+                    <div id="energySelector" class="grid grid-cols-5 gap-2" aria-label="Livello energia da 1 a 5"></div>
+                </fieldset>
+                <div class="sm:col-span-2 lg:col-span-4">
+                    <label for="sessionNotes" class="mb-2 block text-sm font-semibold text-slate-700">Note generali</label>
+                    <textarea id="sessionNotes" rows="3" placeholder="Sensazioni, contesto della sessione o altre annotazioni..." class="w-full resize-y rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"></textarea>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-3 border-t border-slate-200 bg-slate-50 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+                <p class="text-sm text-slate-600">
+                    <span class="font-semibold text-slate-800">Privacy:</span> I dati sono salvati localmente su questo dispositivo.
+                </p>
+                <button id="startSessionBtn" type="button" class="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-200">
+                    <svg class="h-5 w-5" aria-hidden="true" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M8 5.14v13.72a1 1 0 0 0 1.51.86l10.29-6.86a1 1 0 0 0 0-1.72L9.51 4.28A1 1 0 0 0 8 5.14Z"/>
+                    </svg>
+                    Avvia sessione
+                </button>
+            </div>
+        </section>
+
+        <section aria-labelledby="warmup-title" class="overflow-hidden rounded-2xl border border-sky-200 bg-white shadow-sm">
+            <div class="border-b border-sky-200 bg-sky-50 p-5 sm:p-6">
+                <div class="flex items-center gap-3">
+                    <div class="rounded-xl bg-sky-100 p-2 text-sky-700">
+                        <svg class="h-6 w-6" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-wide text-sky-700">Prima degli esercizi principali</p>
+                        <h2 id="warmup-title" class="text-xl font-bold text-slate-950">Riscaldamento</h2>
+                    </div>
+                </div>
+            </div>
+            <div id="warmupChecklist" class="grid gap-3 p-5 sm:p-6 lg:grid-cols-3"></div>
+        </section>
+
+        <section aria-labelledby="workout-title">
+            <div class="mb-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+                <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-wide text-indigo-700">Esercizi principali</p>
+                        <h2 id="workout-title" class="mt-1 text-2xl font-bold text-slate-950">Scheda total body</h2>
+                        <p class="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+                            Registra solo ciò che hai effettivamente svolto. I campi del carico sono intenzionalmente vuoti e non rappresentano una raccomandazione.
+                        </p>
+                    </div>
+                    <div class="min-w-64">
+                        <div class="mb-2 flex items-center justify-between text-sm">
+                            <span class="font-semibold text-slate-700">Progresso sessione</span>
+                            <span id="progressText" class="font-bold text-indigo-700">0%</span>
+                        </div>
+                        <div class="h-3 overflow-hidden rounded-full bg-slate-200" role="progressbar" aria-label="Progresso complessivo" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progressBarContainer">
+                            <div id="progressBar" class="h-full rounded-full bg-indigo-600 transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                        <p id="progressSets" class="mt-2 text-xs text-slate-500">0 serie completate</p>
+                    </div>
+                </div>
+            </div>
+            <div id="exerciseList" class="space-y-4"></div>
+        </section>
+
+        <section aria-labelledby="cooldown-title" class="overflow-hidden rounded-2xl border border-teal-200 bg-white shadow-sm">
+            <div class="border-b border-teal-200 bg-teal-50 p-5 sm:p-6">
+                <div class="flex items-center gap-3">
+                    <div class="rounded-xl bg-teal-100 p-2 text-teal-700">
+                        <svg class="h-6 w-6" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12h3l2-5 4 10 2-5h5"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-wide text-teal-700">Dopo gli esercizi principali</p>
+                        <h2 id="cooldown-title" class="text-xl font-bold text-slate-950">Defaticamento</h2>
+                    </div>
+                </div>
+            </div>
+            <div id="cooldownChecklist" class="grid gap-3 p-5 sm:p-6 lg:grid-cols-3"></div>
+        </section>
+
+        <section aria-labelledby="general-advice-title" class="rounded-2xl border border-indigo-200 bg-indigo-50 p-5 shadow-sm sm:p-6">
+            <h2 id="general-advice-title" class="text-xl font-bold text-indigo-950">Criteri generali, non prescrizione individuale</h2>
+            <p class="mt-1 text-sm text-indigo-800">Indicazioni dimostrative da adattare con un professionista alle necessità personali.</p>
+            <ul class="mt-5 grid gap-3 text-sm leading-6 text-indigo-950 md:grid-cols-2">
+                <li class="flex gap-3 rounded-xl bg-white/70 p-4">
+                    <span class="mt-0.5 font-bold text-indigo-600">01</span>
+                    <span>Frequenza dimostrativa: 2–3 sessioni settimanali non consecutive.</span>
+                </li>
+                <li class="flex gap-3 rounded-xl bg-white/70 p-4">
+                    <span class="mt-0.5 font-bold text-indigo-600">02</span>
+                    <span>Aumentare il carico solo quando tutte le serie raggiungono il limite alto del range con tecnica stabile e 2–3 ripetizioni in riserva.</span>
+                </li>
+                <li class="flex gap-3 rounded-xl bg-white/70 p-4">
+                    <span class="mt-0.5 font-bold text-indigo-600">03</span>
+                    <span>Evitare di allenarsi fino al cedimento.</span>
+                </li>
+                <li class="flex gap-3 rounded-xl bg-white/70 p-4">
+                    <span class="mt-0.5 font-bold text-indigo-600">04</span>
+                    <span>Adattare o sostituire gli esercizi che provocano dolore.</span>
+                </li>
+            </ul>
+        </section>
+
+        <section aria-labelledby="actions-title" class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+            <h2 id="actions-title" class="text-xl font-bold text-slate-950">Gestione del diario</h2>
+            <div class="mt-5 flex flex-wrap gap-3">
+                <button id="saveBtn" type="button" class="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-200">
+                    <svg class="h-5 w-5" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3h12l2 2v16H5V3Zm3 0v6h8V3M8 17h8"/>
+                    </svg>
+                    Salva allenamento
+                </button>
+                <button id="duplicateLastBtn" type="button" class="inline-flex items-center justify-center gap-2 rounded-xl border border-indigo-300 bg-white px-4 py-2.5 text-sm font-bold text-indigo-700 transition hover:bg-indigo-50 focus:outline-none focus:ring-4 focus:ring-indigo-100">
+                    Duplica ultima sessione
+                </button>
+                <button id="newSessionBtn" type="button" class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-200">
+                    Nuova sessione
+                </button>
+                <button id="exportBtn" type="button" class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-200">
+                    Esporta JSON
+                </button>
+                <button id="importBtn" type="button" class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-200">
+                    Importa JSON
+                </button>
+                <input id="importFile" type="file" accept=".json,application/json" class="hidden">
+                <button id="deleteHistoryBtn" type="button" class="inline-flex items-center justify-center gap-2 rounded-xl border border-red-300 bg-white px-4 py-2.5 text-sm font-bold text-red-700 transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100">
+                    Elimina storico
+                </button>
+            </div>
+            <p class="mt-4 text-xs leading-5 text-slate-500">
+                L’esportazione crea un file sul dispositivo. L’importazione accetta esclusivamente file JSON compatibili con questa demo.
+            </p>
+        </section>
+
+        <section aria-labelledby="history-title" class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div class="border-b border-slate-200 p-5 sm:p-6">
+                <h2 id="history-title" class="text-xl font-bold text-slate-950">Storico allenamenti</h2>
+                <p class="mt-1 text-sm text-slate-600">Sessioni salvate, ordinate dalla più recente.</p>
+            </div>
+            <div id="historyList" class="p-5 sm:p-6"></div>
+        </section>
+
+        <section aria-labelledby="summary-title" class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div class="border-b border-slate-200 p-5 sm:p-6">
+                <h2 id="summary-title" class="text-xl font-bold text-slate-950">Riepilogo per esercizio</h2>
+                <p class="mt-1 text-sm leading-6 text-slate-600">
+                    Mostra esclusivamente carichi e ripetizioni o secondi registrati dall’utente nelle ultime sessioni, senza raccomandazioni automatiche.
+                </p>
+            </div>
+            <div id="exerciseSummary" class="grid gap-4 p-5 sm:p-6 lg:grid-cols-2"></div>
+        </section>
+    </main>
+
+    <footer class="mt-10 border-t border-slate-200 bg-white">
+        <div class="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-6 text-sm text-slate-500 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
+            <p>Demo editoriale – AI in ambienti sportivi</p>
+            <p class="font-medium text-slate-600">I dati sono salvati localmente su questo dispositivo.</p>
+        </div>
+    </footer>
+
+    <div id="toastContainer" class="pointer-events-none fixed right-4 top-4 z-50 flex w-[calc(100%-2rem)] max-w-sm flex-col gap-3" aria-live="polite" aria-atomic="true"></div>
+
+    <div id="confirmModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/60 p-4" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmMessage">
+        <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+            <div class="flex items-start gap-4">
+                <div class="rounded-full bg-red-100 p-2 text-red-700">
+                    <svg class="h-6 w-6" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v4m0 4h.01M10.3 3.7 2.7 17a2 2 0 0 0 1.7 3h15.2a2 2 0 0 0 1.7-3L13.7 3.7a2 2 0 0 0-3.4 0Z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h2 id="confirmTitle" class="text-lg font-bold text-slate-950">Conferma operazione</h2>
+                    <p id="confirmMessage" class="mt-2 text-sm leading-6 text-slate-600"></p>
+                </div>
+            </div>
+            <div class="mt-6 flex justify-end gap-3">
+                <button id="confirmCancel" type="button" class="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-200">Annulla</button>
+                <button id="confirmAccept" type="button" class="rounded-xl bg-red-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-200">Conferma</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_HISTORY = 'totalBodyTrainingLog.history.v1';
+        const STORAGE_DRAFT = 'totalBodyTrainingLog.draft.v1';
+
+        const exerciseDefinitions = [
+            {
+                id: 'goblet-squat',
+                name: 'Goblet squat',
+                sets: 3,
+                target: '8–12',
+                recovery: '90–120 secondi',
+                tip: 'Mantieni il torace stabile, le ginocchia in linea con i piedi e scendi entro un’ampiezza controllabile.',
+                mode: 'reps'
+            },
+            {
+                id: 'chest-press',
+                name: 'Chest press alla macchina oppure push-up inclinati',
+                sets: 3,
+                target: '8–12',
+                recovery: '90–120 secondi',
+                tip: 'Mantieni scapole stabili, polsi allineati e controlla la fase di ritorno senza perdere l’assetto.',
+                mode: 'reps'
+            },
+            {
+                id: 'lat-machine',
+                name: 'Lat machine presa neutra',
+                sets: 3,
+                target: '8–12',
+                recovery: '90–120 secondi',
+                tip: 'Avvia il movimento abbassando le scapole, evita slanci e mantieni il busto stabile.',
+                mode: 'reps'
+            },
+            {
+                id: 'romanian-deadlift',
+                name: 'Romanian deadlift con manubri',
+                sets: 3,
+                target: '8–10',
+                recovery: '90–120 secondi',
+                tip: 'Porta indietro le anche con colonna neutra e mantieni i manubri vicini alle gambe.',
+                mode: 'reps'
+            },
+            {
+                id: 'shoulder-press',
+                name: 'Shoulder press alla macchina',
+                sets: 2,
+                target: '10–12',
+                recovery: '60–90 secondi',
+                tip: 'Mantieni il tronco appoggiato e stabile, evitando di inarcare eccessivamente la zona lombare.',
+                mode: 'reps'
+            },
+            {
+                id: 'seated-row',
+                name: 'Rematore al cavo da seduto',
+                sets: 2,
+                target: '10–12',
+                recovery: '60–90 secondi',
+                tip: 'Tira con i gomiti senza sollevare le spalle e controlla il ritorno mantenendo il busto fermo.',
+                mode: 'reps'
+            },
+            {
+                id: 'reverse-lunge',
+                name: 'Affondi all’indietro',
+                sets: 2,
+                target: '8–10 per lato',
+                recovery: '90–120 secondi',
+                tip: 'Esegui un passo stabile all’indietro, controlla la discesa e mantieni il ginocchio anteriore allineato.',
+                mode: 'reps'
+            },
+            {
+                id: 'plank',
+                name: 'Plank',
+                sets: 3,
+                target: '20–40 secondi',
+                recovery: '45–60 secondi',
+                tip: 'Mantieni testa, tronco e bacino allineati, respira regolarmente e interrompi prima di perdere l’assetto.',
+                mode: 'seconds'
+            }
+        ];
+
+        const warmupItems = [
+            '5–8 minuti di attività leggera e progressiva.',
+            'Mobilità dinamica di anche, caviglie, spalle e colonna toracica.',
+            '1–2 serie preparatorie leggere per il primo esercizio.'
+        ];
+
+        const cooldownItems = [
+            '3–5 minuti di attività gradualmente più leggera.',
+            'Respirazione regolare e ritorno progressivo alla calma.',
+            'Mobilità leggera senza forzare le posizioni.'
+        ];
+
+        let history = loadJSON(STORAGE_HISTORY, []);
+        let currentSession = normalizeSession(loadJSON(STORAGE_DRAFT, null) || createBlankSession());
+        let confirmCallback = null;
+        let lastFocusedElement = null;
+
+        const exerciseList = document.getElementById('exerciseList');
+        const historyList = document.getElementById('historyList');
+        const exerciseSummary = document.getElementById('exerciseSummary');
+        const modal = document.getElementById('confirmModal');
+
+        function localDateString() {
+            const now = new Date();
+            const offset = now.getTimezoneOffset();
+            return new Date(now.getTime() - offset * 60000).toISOString().slice(0, 10);
+        }
+
+        function createSet() {
+            return {
+                completed: false,
+                load: '',
+                unit: 'kg',
+                actual: '',
+                rpe: '',
+                notes: ''
+            };
+        }
+
+        function createBlankSession() {
+            return {
+                id: null,
+                date: localDateString(),
+                duration: '',
+                energy: '',
+                notes: '',
+                started: false,
+                startedAt: null,
+                savedAt: null,
+                warmup: warmupItems.map(() => false),
+                cooldown: cooldownItems.map(() => false),
+                exercises: exerciseDefinitions.map(def => ({
+                    id: def.id,
+                    expanded: true,
+                    sets: Array.from({ length: def.sets }, createSet)
+                }))
+            };
+        }
+
+        function normalizeSession(raw) {
+            const blank = createBlankSession();
+            if (!raw || typeof raw !== 'object') return blank;
+
+            blank.id = typeof raw.id === 'string' ? raw.id : null;
+            blank.date = typeof raw.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(raw.date) ? raw.date : localDateString();
+            blank.duration = safeNumericString(raw.duration);
+            blank.energy = [1, 2, 3, 4, 5].includes(Number(raw.energy)) ? String(raw.energy) : '';
+            blank.notes = safeText(raw.notes, 4000);
+            blank.started = Boolean(raw.started);
+            blank.startedAt = typeof raw.startedAt === 'string' ? raw.startedAt : null;
+            blank.savedAt = typeof raw.savedAt === 'string' ? raw.savedAt : null;
+            blank.warmup = warmupItems.map((_, i) => Boolean(Array.isArray(raw.warmup) && raw.warmup[i]));
+            blank.cooldown = cooldownItems.map((_, i) => Boolean(Array.isArray(raw.cooldown) && raw.cooldown[i]));
+
+            blank.exercises = exerciseDefinitions.map(def => {
+                const sourceExercise = Array.isArray(raw.exercises) ? raw.exercises.find(item => item && item.id === def.id) : null;
+                return {
+                    id: def.id,
+                    expanded: sourceExercise ? sourceExercise.expanded !== false : true,
+                    sets: Array.from({ length: def.sets }, (_, index) => {
+                        const sourceSet = sourceExercise && Array.isArray(sourceExercise.sets) ? sourceExercise.sets[index] : null;
+                        return {
+                            completed: Boolean(sourceSet && sourceSet.completed),
+                            load: sourceSet ? safeNumericString(sourceSet.load) : '',
+                            unit: sourceSet && sourceSet.unit === 'lb' ? 'lb' : 'kg',
+                            actual: sourceSet ? safeNumericString(sourceSet.actual) : '',
+                            rpe: sourceSet && Number(sourceSet.rpe) >= 1 && Number(sourceSet.rpe) <= 10 ? String(sourceSet.rpe) : '',
+                            notes: sourceSet ? safeText(sourceSet.notes, 500) : ''
+                        };
+                    })
+                };
+            });
+
+            return blank;
+        }
+
+        function safeText(value, maxLength) {
+            return typeof value === 'string' ? value.slice(0, maxLength) : '';
+        }
+
+        function safeNumericString(value) {
+            if (value === '' || value === null || value === undefined) return '';
+            const number = Number(value);
+            return Number.isFinite(number) && number >= 0 ? String(value).slice(0, 20) : '';
+        }
+
+        function loadJSON(key, fallback) {
+            try {
+                const value = localStorage.getItem(key);
+                return value ? JSON.parse(value) : fallback;
+            } catch (error) {
+                console.error('Errore di lettura localStorage:', error);
+                return fallback;
+            }
+        }
+
+        function persistDraft() {
+            try {
+                localStorage.setItem(STORAGE_DRAFT, JSON.stringify(currentSession));
+            } catch (error) {
+                console.error('Impossibile salvare la bozza:', error);
+            }
+        }
+
+        function persistHistory() {
+            try {
+                localStorage.setItem(STORAGE_HISTORY, JSON.stringify(history));
+                return true;
+            } catch (error) {
+                console.error('Impossibile salvare lo storico:', error);
+                showToast('Spazio locale insufficiente: salvataggio non riuscito.', 'error');
+                return false;
+            }
+        }
+
+        function escapeHTML(value) {
+            return String(value ?? '')
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'Data non disponibile';
+            const date = new Date(dateString + 'T12:00:00');
+            if (Number.isNaN(date.getTime())) return dateString;
+            return new Intl.DateTimeFormat('it-IT', {
+                day: '2-digit',
+                month: 'long',
+                year: 'numeric'
+            }).format(date);
+        }
+
+        function sortedHistory() {
+            return [...history].sort((a, b) => {
+                const dateCompare = String(b.date || '').localeCompare(String(a.date || ''));
+                if (dateCompare !== 0) return dateCompare;
+                return String(b.savedAt || '').localeCompare(String(a.savedAt || ''));
+            });
+        }
+
+        function calculateProgress(session) {
+            const sets = session.exercises.flatMap(exercise => exercise.sets);
+            const completed = sets.filter(set => set.completed).length;
+            const total = sets.length;
+            return {
+                completed,
+                total,
+                percentage: total ? Math.round((completed / total) * 100) : 0
+            };
+        }
+
+        function renderAll() {
+            renderSessionFields();
+            renderChecklist('warmupChecklist', warmupItems, 'warmup');
+            renderChecklist('cooldownChecklist', cooldownItems, 'cooldown');
+            renderExercises();
+            renderProgress();
+            renderHistory();
+            renderSummary();
+            renderLastSaved();
+        }
+
+        function renderSessionFields() {
+            document.getElementById('sessionDate').value = currentSession.date;
+            document.getElementById('sessionDuration').value = currentSession.duration;
+            document.getElementById('sessionNotes').value = currentSession.notes;
+
+            document.getElementById('energySelector').innerHTML = [1, 2, 3, 4, 5].map(level => `
+                <label class="cursor-pointer">
+                    <input type="radio" name="energy" value="${level}" class="peer sr-only" ${String(currentSession.energy) === String(level) ? 'checked' : ''}>
+                    <span class="flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white text-sm font-bold text-slate-700 transition hover:border-indigo-400 hover:bg-indigo-50 peer-checked:border-indigo-600 peer-checked:bg-indigo-600 peer-checked:text-white peer-focus-visible:ring-4 peer-focus-visible:ring-indigo-200">${level}</span>
+                </label>
+            `).join('');
+
+            const status = document.getElementById('sessionStatus');
+            const startBtn = document.getElementById('startSessionBtn');
+
+            if (currentSession.started) {
+                status.className = 'inline-flex w-fit items-center gap-2 rounded-full bg-emerald-100 px-3 py-1.5 text-sm font-semibold text-emerald-800';
+                status.innerHTML = '<span class="h-2 w-2 rounded-full bg-emerald-500"></span>Sessione avviata';
+                startBtn.innerHTML = `
+                    <svg class="h-5 w-5" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m5 13 4 4L19 7"/>
+                    </svg>
+                    Sessione avviata
+                `;
+                startBtn.className = 'inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700 focus:outline-none focus:ring-4 focus:ring-emerald-200';
+            } else {
+                status.className = 'inline-flex w-fit items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 text-sm font-semibold text-slate-700';
+                status.innerHTML = '<span class="h-2 w-2 rounded-full bg-slate-400"></span>Non avviata';
+                startBtn.innerHTML = `
+                    <svg class="h-5 w-5" aria-hidden="true" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M8 5.14v13.72a1 1 0 0 0 1.51.86l10.29-6.86a1 1 0 0 0 0-1.72L9.51 4.28A1 1 0 0 0 8 5.14Z"/>
+                    </svg>
+                    Avvia sessione
+                `;
+                startBtn.className = 'inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-200';
+            }
+        }
+
+        function renderChecklist(containerId, items, field) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = items.map((item, index) => `
+                <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 transition hover:border-indigo-300 hover:bg-indigo-50/40">
+                    <input type="checkbox" data-checklist="${field}" data-index="${index}" ${currentSession[field][index] ? 'checked' : ''} class="mt-0.5 h-5 w-5 shrink-0 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
+                    <span class="text-sm font-medium leading-6 text-slate-700">${escapeHTML(item)}</span>
+                </label>
+            `).join('');
+        }
+
+        function renderExercises() {
+            exerciseList.innerHTML = exerciseDefinitions.map((def, exerciseIndex) => {
+                const exercise = currentSession.exercises[exerciseIndex];
+                const completed = exercise.sets.filter(set => set.completed).length;
+                const isComplete = completed === def.sets;
+
+                return `
+                    <article class="overflow-hidden rounded-2xl border ${isComplete ? 'border-emerald-300' : 'border-slate-200'} bg-white shadow-sm transition">
+                        <button type="button" data-action="toggle" data-exercise="${exerciseIndex}" aria-expanded="${exercise.expanded}" aria-controls="exercise-panel-${exerciseIndex}" class="flex w-full items-start justify-between gap-4 p-5 text-left transition hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-inset focus:ring-indigo-100 sm:p-6">
+                            <div class="flex min-w-0 gap-4">
+                                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${isComplete ? 'bg-emerald-100 text-emerald-700' : 'bg-indigo-100 text-indigo-700'} font-bold">${exerciseIndex + 1}</div>
+                                <div class="min-w-0">
+                                    <h3 class="font-bold text-slate-950 sm:text-lg">${escapeHTML(def.name)}</h3>
+                                    <div class="mt-2 flex flex-wrap gap-2 text-xs font-semibold">
+                                        <span class="rounded-full bg-indigo-50 px-2.5 py-1 text-indigo-700">${def.sets} serie × ${escapeHTML(def.target)}</span>
+                                        <span class="rounded-full bg-slate-100 px-2.5 py-1 text-slate-700">Recupero ${escapeHTML(def.recovery)}</span>
+                                        <span class="rounded-full ${isComplete ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-700'} px-2.5 py-1">${completed}/${def.sets} completate</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <svg class="mt-2 h-5 w-5 shrink-0 text-slate-500 transition-transform ${exercise.expanded ? 'rotate-180' : ''}" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m6 9 6 6 6-6"/>
+                            </svg>
+                        </button>
+
+                        <div id="exercise-panel-${exerciseIndex}" ${exercise.expanded ? '' : 'hidden'} class="border-t border-slate-200">
+                            <div class="grid gap-3 bg-slate-50 p-5 sm:grid-cols-2 sm:p-6">
+                                <div class="rounded-xl border border-slate-200 bg-white p-4">
+                                    <p class="text-xs font-bold uppercase tracking-wide text-slate-500">Consiglio di esecuzione</p>
+                                    <p class="mt-2 text-sm leading-6 text-slate-700">${escapeHTML(def.tip)}</p>
+                                </div>
+                                <div class="rounded-xl border border-indigo-200 bg-indigo-50 p-4">
+                                    <p class="text-xs font-bold uppercase tracking-wide text-indigo-700">Intensità percepita</p>
+                                    <p class="mt-2 text-sm font-semibold leading-6 text-indigo-950">Mantieni 2–3 ripetizioni in riserva; tecnica stabile e movimento controllato.</p>
+                                </div>
+                            </div>
+
+                            <div class="overflow-x-auto">
+                                <table class="w-full min-w-[980px] border-collapse text-left text-sm">
+                                    <caption class="sr-only">Registrazione delle serie per ${escapeHTML(def.name)}</caption>
+                                    <thead class="border-y border-slate-200 bg-white text-xs uppercase tracking-wide text-slate-500">
+                                        <tr>
+                                            <th scope="col" class="px-4 py-3 text-center">Serie</th>
+                                            <th scope="col" class="px-4 py-3 text-center">Completata</th>
+                                            <th scope="col" class="px-4 py-3">Target</th>
+                                            <th scope="col" class="px-4 py-3">Carico usato</th>
+                                            <th scope="col" class="px-4 py-3">Unità</th>
+                                            <th scope="col" class="px-4 py-3">${def.mode === 'seconds' ? 'Secondi effettivi' : 'Ripetizioni effettive'}</th>
+                                            <th scope="col" class="px-4 py-3">RPE 1–10</th>
+                                            <th scope="col" class="px-4 py-3">Note</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-200">
+                                        ${exercise.sets.map((set, setIndex) => `
+                                            <tr class="${set.completed ? 'bg-emerald-50/60' : 'bg-white'}">
+                                                <th scope="row" class="px-4 py-4 text-center font-bold text-slate-900">${setIndex + 1}</th>
+                                                <td class="px-4 py-4 text-center">
+                                                    <input type="checkbox" aria-label="Serie ${setIndex + 1} completata" data-exercise="${exerciseIndex}" data-set="${setIndex}" data-field="completed" ${set.completed ? 'checked' : ''} class="h-5 w-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
+                                                </td>
+                                                <td class="px-4 py-4 font-semibold text-indigo-700">${escapeHTML(def.target)}</td>
+                                                <td class="px-4 py-4">
+                                                    <input type="number" min="0" step="0.1" inputmode="decimal" aria-label="Carico usato serie ${setIndex + 1}" placeholder="Vuoto" value="${escapeHTML(set.load)}" data-exercise="${exerciseIndex}" data-set="${setIndex}" data-field="load" class="w-28 rounded-lg border border-slate-300 px-3 py-2 outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100">
+                                                </td>
+                                                <td class="px-4 py-4">
+                                                    <select aria-label="Unità del carico serie ${setIndex + 1}" data-exercise="${exerciseIndex}" data-set="${setIndex}" data-field="unit" class="rounded-lg border border-slate-300 bg-white px-3 py-2 outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100">
+                                                        <option value="kg" ${set.unit === 'kg' ? 'selected' : ''}>kg</option>
+                                                        <option value="lb" ${set.unit === 'lb' ? 'selected' : ''}>lb</option>
+                                                    </select>
+                                                </td>
+                                                <td class="px-4 py-4">
+                                                    <input type="number" min="0" step="1" inputmode="numeric" aria-label="${def.mode === 'seconds' ? 'Secondi' : 'Ripetizioni'} effettivi serie ${setIndex + 1}" placeholder="${escapeHTML(def.target)}" value="${escapeHTML(set.actual)}" data-exercise="${exerciseIndex}" data-set="${setIndex}" data-field="actual" class="w-36 rounded-lg border border-slate-300 px-3 py-2 outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100">
+                                                </td>
+                                                <td class="px-4 py-4">
+                                                    <input type="number" min="1" max="10" step="1" inputmode="numeric" aria-label="RPE serie ${setIndex + 1}" placeholder="Opzionale" value="${escapeHTML(set.rpe)}" data-exercise="${exerciseIndex}" data-set="${setIndex}" data-field="rpe" class="w-28 rounded-lg border border-slate-300 px-3 py-2 outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100">
+                                                </td>
+                                                <td class="px-4 py-4">
+                                                    <input type="text" maxlength="500" aria-label="Note serie ${setIndex + 1}" placeholder="Annotazioni" value="${escapeHTML(set.notes)}" data-exercise="${exerciseIndex}" data-set="${setIndex}" data-field="notes" class="w-48 rounded-lg border border-slate-300 px-3 py-2 outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100">
+                                                </td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="flex flex-wrap gap-3 border-t border-slate-200 bg-slate-50 p-5 sm:p-6">
+                                <button type="button" data-action="complete-all" data-exercise="${exerciseIndex}" class="rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-emerald-700 focus:outline-none focus:ring-4 focus:ring-emerald-200">Segna tutte completate</button>
+                                <button type="button" data-action="reset" data-exercise="${exerciseIndex}" class="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-100 focus:outline-none focus:ring-4 focus:ring-slate-200">Resetta esercizio</button>
+                            </div>
+                        </div>
+                    </article>
+                `;
+            }).join('');
+        }
+
+        function renderProgress() {
+            const progress = calculateProgress(currentSession);
+            document.getElementById('progressText').textContent = `${progress.percentage}%`;
+            document.getElementById('progressBar').style.width = `${progress.percentage}%`;
+            document.getElementById('progressSets').textContent = `${progress.completed} di ${progress.total} serie completate`;
+            document.getElementById('progressBarContainer').setAttribute('aria-valuenow', String(progress.percentage));
+        }
+
+        function renderLastSaved() {
+            const latest = sortedHistory()[0];
+            const indicator = document.getElementById('lastSavedIndicator');
+            if (!latest) {
+                indicator.textContent = 'Nessuna sessione salvata';
+                return;
+            }
+            const progress = calculateProgress(latest);
+            indicator.textContent = `${formatDate(latest.date)} · ${progress.percentage}% completato`;
+        }
+
+        function renderHistory() {
+            const sessions = sortedHistory();
+
+            if (!sessions.length) {
+                historyList.innerHTML = `
+                    <div class="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-5 py-10 text-center">
+                        <svg class="mx-auto h-10 w-10 text-slate-400" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 3h10v4H7V3ZM5 5H4a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-1M7 12h10M7 16h6"/>
+                        </svg>
+                        <p class="mt-3 font-semibold text-slate-700">Nessun allenamento salvato</p>
+                        <p class="mt-1 text-sm text-slate-500">Le sessioni compariranno qui dopo il salvataggio.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            historyList.innerHTML = `<ol class="space-y-3">${sessions.map(session => {
+                const progress = calculateProgress(session);
+                return `
+                    <li class="rounded-xl border border-slate-200 p-4 transition hover:border-indigo-300 hover:shadow-sm">
+                        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                            <div>
+                                <p class="font-bold text-slate-950">${formatDate(session.date)}</p>
+                                <div class="mt-2 flex flex-wrap gap-2 text-xs font-semibold">
+                                    <span class="rounded-full bg-indigo-50 px-2.5 py-1 text-indigo-700">${progress.percentage}% completato</span>
+                                    <span class="rounded-full bg-slate-100 px-2.5 py-1 text-slate-700">Durata: ${session.duration !== '' ? `${escapeHTML(session.duration)} min` : 'non indicata'}</span>
+                                    <span class="rounded-full bg-slate-100 px-2.5 py-1 text-slate-700">Energia: ${session.energy !== '' ? `${escapeHTML(session.energy)}/5` : 'non indicata'}</span>
+                                </div>
+                            </div>
+                            <div class="flex flex-wrap gap-2">
+                                <button type="button" data-history-action="open" data-id="${escapeHTML(session.id)}" class="rounded-lg bg-indigo-600 px-3.5 py-2 text-sm font-bold text-white transition hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-200">Apri</button>
+                                <button type="button" data-history-action="duplicate" data-id="${escapeHTML(session.id)}" class="rounded-lg border border-indigo-300 px-3.5 py-2 text-sm font-bold text-indigo-700 transition hover:bg-indigo-50 focus:outline-none focus:ring-4 focus:ring-indigo-100">Duplica</button>
+                                <button type="button" data-history-action="delete" data-id="${escapeHTML(session.id)}" class="rounded-lg border border-red-300 px-3.5 py-2 text-sm font-bold text-red-700 transition hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100">Elimina</button>
+                            </div>
+                        </div>
+                    </li>
+                `;
+            }).join('')}</ol>`;
+        }
+
+        function renderSummary() {
+            const sessions = sortedHistory().slice(0, 5);
+
+            exerciseSummary.innerHTML = exerciseDefinitions.map((def, defIndex) => {
+                const entries = [];
+
+                sessions.forEach(session => {
+                    const exercise = session.exercises[defIndex];
+                    if (!exercise) return;
+
+                    const values = exercise.sets.map((set, setIndex) => {
+                        const parts = [];
+                        if (set.load !== '') parts.push(`${escapeHTML(set.load)} ${escapeHTML(set.unit)}`);
+                        if (set.actual !== '') parts.push(`${escapeHTML(set.actual)} ${def.mode === 'seconds' ? 'sec' : 'rip.'}`);
+                        return parts.length ? `S${setIndex + 1}: ${parts.join(' · ')}` : '';
+                    }).filter(Boolean);
+
+                    if (values.length) {
+                        entries.push({
+                            date: session.date,
+                            values
+                        });
+                    }
+                });
+
+                return `
+                    <article class="rounded-xl border border-slate-200 p-4">
+                        <h3 class="font-bold text-slate-950">${escapeHTML(def.name)}</h3>
+                        ${entries.length ? `
+                            <ul class="mt-3 space-y-3">
+                                ${entries.map(entry => `
+                                    <li class="border-t border-slate-100 pt-3 first:border-0 first:pt-0">
+                                        <p class="text-xs font-bold uppercase tracking-wide text-slate-500">${formatDate(entry.date)}</p>
+                                        <p class="mt-1 text-sm leading-6 text-slate-700">${entry.values.join(' | ')}</p>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        ` : '<p class="mt-3 text-sm text-slate-500">Nessun valore registrato nelle ultime sessioni.</p>'}
+                    </article>
+                `;
+            }).join('');
+        }
+
+        function saveSession() {
+            syncSessionFields();
+
+            if (!currentSession.date) {
+                showToast('Inserisci una data valida prima di salvare.', 'error');
+                document.getElementById('sessionDate').focus();
+                return;
+            }
+
+            const now = new Date().toISOString();
+            if (!currentSession.id) {
+                currentSession.id = `session-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+            }
+            currentSession.savedAt = now;
+
+            const normalized = normalizeSession(currentSession);
+            const existingIndex = history.findIndex(item => item.id === normalized.id);
+
+            if (existingIndex >= 0) {
+                history[existingIndex] = normalized;
+            } else {
+                history.push(normalized);
+            }
+
+            if (persistHistory()) {
+                currentSession = normalizeSession(normalized);
+                persistDraft();
+                renderAll();
+                showToast(existingIndex >= 0 ? 'Allenamento aggiornato.' : 'Allenamento salvato correttamente.', 'success');
+            }
+        }
+
+        function syncSessionFields() {
+            currentSession.date = document.getElementById('sessionDate').value || localDateString();
+            currentSession.duration = safeNumericString(document.getElementById('sessionDuration').value);
+            currentSession.notes = safeText(document.getElementById('sessionNotes').value, 4000);
+            const selectedEnergy = document.querySelector('input[name="energy"]:checked');
+            currentSession.energy = selectedEnergy ? selectedEnergy.value : '';
+        }
+
+        function hasSessionData(session) {
+            return Boolean(
+                session.duration ||
+                session.energy ||
+                session.notes ||
+                session.started ||
+                session.warmup.some(Boolean) ||
+                session.cooldown.some(Boolean) ||
+                session.exercises.some(exercise =>
+                    exercise.sets.some(set => set.completed || set.load || set.actual || set.rpe || set.notes)
+                )
+            );
+        }
+
+        function createDuplicate(session) {
+            const duplicate = normalizeSession(session);
+            duplicate.id = null;
+            duplicate.date = localDateString();
+            duplicate.duration = '';
+            duplicate.energy = '';
+            duplicate.notes = '';
+            duplicate.started = false;
+            duplicate.startedAt = null;
+            duplicate.savedAt = null;
+            duplicate.warmup = warmupItems.map(() => false);
+            duplicate.cooldown = cooldownItems.map(() => false);
+            duplicate.exercises.forEach(exercise => {
+                exercise.expanded = true;
+                exercise.sets = exercise.sets.map(() => createSet());
+            });
+            return duplicate;
+        }
+
+        function duplicateLastSession() {
+            const latest = sortedHistory()[0];
+            if (!latest) {
+                showToast('Non ci sono sessioni da duplicare.', 'error');
+                return;
+            }
+            currentSession = createDuplicate(latest);
+            persistDraft();
+            renderAll();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            showToast('Nuova sessione creata. I campi del carico sono vuoti.', 'success');
+        }
+
+        function newSession() {
+            const proceed = () => {
+                currentSession = createBlankSession();
+                persistDraft();
+                renderAll();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                showToast('Nuova sessione pronta.', 'success');
+            };
+
+            syncSessionFields();
+            if (hasSessionData(currentSession)) {
+                openConfirm(
+                    'Creare una nuova sessione?',
+                    'Le modifiche non salvate della sessione corrente saranno sostituite. Lo storico già salvato resterà disponibile.',
+                    proceed,
+                    'Crea nuova'
+                );
+            } else {
+                proceed();
+            }
+        }
+
+        function openHistorySession(id) {
+            const session = history.find(item => item.id === id);
+            if (!session) {
+                showToast('Sessione non trovata.', 'error');
+                return;
+            }
+            currentSession = normalizeSession(session);
+            persistDraft();
+            renderAll();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            showToast('Sessione aperta.', 'success');
+        }
+
+        function duplicateHistorySession(id) {
+            const session = history.find(item => item.id === id);
+            if (!session) {
+                showToast('Sessione non trovata.', 'error');
+                return;
+            }
+            currentSession = createDuplicate(session);
+            persistDraft();
+            renderAll();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            showToast('Sessione duplicata con campi di registrazione vuoti.', 'success');
+        }
+
+        function deleteHistorySession(id) {
+            const session = history.find(item => item.id === id);
+            if (!session) return;
+
+            openConfirm(
+                'Eliminare questa sessione?',
+                `La sessione del ${formatDate(session.date)} sarà rimossa definitivamente dallo storico locale.`,
+                () => {
+                    history = history.filter(item => item.id !== id);
+                    persistHistory();
+                    renderHistory();
+                    renderSummary();
+                    renderLastSaved();
+                    showToast('Sessione eliminata dallo storico.', 'success');
+                },
+                'Elimina'
+            );
+        }
+
+        function deleteAllHistory() {
+            if (!history.length) {
+                showToast('Lo storico è già vuoto.', 'error');
+                return;
+            }
+
+            openConfirm(
+                'Eliminare tutto lo storico?',
+                'Questa operazione rimuoverà definitivamente tutte le sessioni salvate localmente. La sessione corrente resterà disponibile come bozza.',
+                () => {
+                    history = [];
+                    persistHistory();
+                    renderHistory();
+                    renderSummary();
+                    renderLastSaved();
+                    showToast('Storico eliminato.', 'success');
+                },
+                'Elimina tutto'
+            );
+        }
+
+        function exportData() {
+            try {
+                syncSessionFields();
+                persistDraft();
+
+                const payload = {
+                    app: 'Total Body Training Log',
+                    version: 1,
+                    exportedAt: new Date().toISOString(),
+                    currentSession,
+                    history
+                };
+
+                const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `total-body-training-log-${localDateString()}.json`;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                URL.revokeObjectURL(url);
+                showToast('Esportazione JSON completata.', 'success');
+            } catch (error) {
+                console.error(error);
+                showToast('Impossibile esportare i dati.', 'error');
+            }
+        }
+
+        function importData(file) {
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = event => {
+                try {
+                    const payload = JSON.parse(event.target.result);
+                    if (!payload || !Array.isArray(payload.history)) {
+                        throw new Error('Formato non valido');
+                    }
+
+                    const importedHistory = payload.history.map(normalizeSession).filter(session => session.id);
+                    const merged = new Map(history.map(session => [session.id, session]));
+                    importedHistory.forEach(session => merged.set(session.id, session));
+                    history = Array.from(merged.values());
+
+                    if (payload.currentSession && typeof payload.currentSession === 'object') {
+                        currentSession = normalizeSession(payload.currentSession);
+                    }
+
+                    if (!persistHistory()) return;
+                    persistDraft();
+                    renderAll();
+                    showToast(`Importazione completata: ${importedHistory.length} sessioni elaborate.`, 'success');
+                } catch (error) {
+                    console.error(error);
+                    showToast('File JSON non valido o non compatibile.', 'error');
+                } finally {
+                    document.getElementById('importFile').value = '';
+                }
+            };
+
+            reader.onerror = () => {
+                showToast('Errore durante la lettura del file.', 'error');
+                document.getElementById('importFile').value = '';
+            };
+
+            reader.readAsText(file);
+        }
+
+        function openConfirm(title, message, callback, acceptLabel) {
+            lastFocusedElement = document.activeElement;
+            document.getElementById('confirmTitle').textContent = title;
+            document.getElementById('confirmMessage').textContent = message;
+            document.getElementById('confirmAccept').textContent = acceptLabel || 'Conferma';
+            confirmCallback = callback;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.classList.add('overflow-hidden');
+            setTimeout(() => document.getElementById('confirmCancel').focus(), 0);
+        }
+
+        function closeConfirm() {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.classList.remove('overflow-hidden');
+            confirmCallback = null;
+            if (lastFocusedElement) lastFocusedElement.focus();
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            const isError = type === 'error';
+
+            toast.className = `pointer-events-auto flex items-start gap-3 rounded-xl border px-4 py-3 shadow-lg transition duration-300 ${isError ? 'border-red-200 bg-red-50 text-red-900' : 'border-emerald-200 bg-emerald-50 text-emerald-900'}`;
+            toast.innerHTML = `
+                <svg class="mt-0.5 h-5 w-5 shrink-0 ${isError ? 'text-red-600' : 'text-emerald-600'}" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    ${isError
+                        ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v4m0 4h.01M12 3a9 9 0 1 1 0 18 9 9 0 0 1 0-18Z"/>'
+                        : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m5 12 4 4L19 6"/>'}
+                </svg>
+                <p class="flex-1 text-sm font-semibold leading-5">${escapeHTML(message)}</p>
+                <button type="button" aria-label="Chiudi notifica" class="rounded p-1 transition hover:bg-black/5 focus:outline-none focus:ring-2 focus:ring-current">
+                    <svg class="h-4 w-4" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-width="2" d="m6 6 12 12M18 6 6 18"/>
+                    </svg>
+                </button>
+            `;
+
+            toast.querySelector('button').addEventListener('click', () => toast.remove());
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.add('translate-x-4', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        document.getElementById('sessionDate').addEventListener('change', event => {
+            currentSession.date = event.target.value;
+            persistDraft();
+        });
+
+        document.getElementById('sessionDuration').addEventListener('input', event => {
+            currentSession.duration = safeNumericString(event.target.value);
+            persistDraft();
+        });
+
+        document.getElementById('sessionNotes').addEventListener('input', event => {
+            currentSession.notes = safeText(event.target.value, 4000);
+            persistDraft();
+        });
+
+        document.getElementById('energySelector').addEventListener('change', event => {
+            if (event.target.name === 'energy') {
+                currentSession.energy = event.target.value;
+                persistDraft();
+            }
+        });
+
+        document.getElementById('startSessionBtn').addEventListener('click', () => {
+            if (!currentSession.started) {
+                currentSession.started = true;
+                currentSession.startedAt = new Date().toISOString();
+                persistDraft();
+                renderSessionFields();
+                showToast('Sessione avviata.', 'success');
+            } else {
+                showToast('La sessione è già avviata.', 'success');
+            }
+        });
+
+        document.querySelectorAll('#warmupChecklist, #cooldownChecklist').forEach(container => {
+            container.addEventListener('change', event => {
+                const field = event.target.dataset.checklist;
+                const index = Number(event.target.dataset.index);
+                if (field && Number.isInteger(index)) {
+                    currentSession[field][index] = event.target.checked;
+                    persistDraft();
+                }
+            });
+        });
+
+        exerciseList.addEventListener('click', event => {
+            const button = event.target.closest('button[data-action]');
+            if (!button) return;
+
+            const exerciseIndex = Number(button.dataset.exercise);
+            const action = button.dataset.action;
+            const exercise = currentSession.exercises[exerciseIndex];
+
+            if (!exercise) return;
+
+            if (action === 'toggle') {
+                exercise.expanded = !exercise.expanded;
+                persistDraft();
+                renderExercises();
+                return;
+            }
+
+            if (action === 'complete-all') {
+                exercise.sets.forEach(set => set.completed = true);
+                persistDraft();
+                renderExercises();
+                renderProgress();
+                return;
+            }
+
+            if (action === 'reset') {
+                openConfirm(
+                    'Resettare questo esercizio?',
+                    'Completamento, carichi, valori effettivi, RPE e note di tutte le serie saranno cancellati.',
+                    () => {
+                        exercise.sets = Array.from({ length: exercise.sets.length }, createSet);
+                        persistDraft();
+                        renderExercises();
+                        renderProgress();
+                        showToast('Esercizio resettato.', 'success');
+                    },
+                    'Resetta'
+                );
+            }
+        });
+
+        exerciseList.addEventListener('input', updateExerciseField);
+        exerciseList.addEventListener('change', updateExerciseField);
+
+        function updateExerciseField(event) {
+            const target = event.target;
+            if (target.dataset.exercise === undefined || target.dataset.set === undefined || !target.dataset.field) return;
+
+            const exerciseIndex = Number(target.dataset.exercise);
+            const setIndex = Number(target.dataset.set);
+            const field = target.dataset.field;
+            const set = currentSession.exercises[exerciseIndex]?.sets[setIndex];
+            if (!set) return;
+
+            if (field === 'completed') {
+                set.completed = target.checked;
+                persistDraft();
+                renderExercises();
+                renderProgress();
+                return;
+            }
+
+            if (field === 'notes') set[field] = safeText(target.value, 500);
+            else if (field === 'unit') set[field] = target.value === 'lb' ? 'lb' : 'kg';
+            else if (field === 'rpe') {
+                const value = Number(target.value);
+                set[field] = target.value === '' ? '' : String(Math.min(10, Math.max(1, value)));
+            } else {
+                set[field] = safeNumericString(target.value);
+            }
+
+            persistDraft();
+        }
+
+        historyList.addEventListener('click', event => {
+            const button = event.target.closest('button[data-history-action]');
+            if (!button) return;
+            const id = button.dataset.id;
+
+            if (button.dataset.historyAction === 'open') openHistorySession(id);
+            if (button.dataset.historyAction === 'duplicate') duplicateHistorySession(id);
+            if (button.dataset.historyAction === 'delete') deleteHistorySession(id);
+        });
+
+        document.getElementById('saveBtn').addEventListener('click', saveSession);
+        document.getElementById('duplicateLastBtn').addEventListener('click', duplicateLastSession);
+        document.getElementById('newSessionBtn').addEventListener('click', newSession);
+        document.getElementById('exportBtn').addEventListener('click', exportData);
+        document.getElementById('importBtn').addEventListener('click', () => document.getElementById('importFile').click());
+        document.getElementById('importFile').addEventListener('change', event => importData(event.target.files[0]));
+        document.getElementById('deleteHistoryBtn').addEventListener('click', deleteAllHistory);
+
+        document.getElementById('confirmCancel').addEventListener('click', closeConfirm);
+        document.getElementById('confirmAccept').addEventListener('click', () => {
+            const callback = confirmCallback;
+            closeConfirm();
+            if (callback) callback();
+        });
+
+        modal.addEventListener('click', event => {
+            if (event.target === modal) closeConfirm();
+        });
+
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape' && !modal.classList.contains('hidden')) closeConfirm();
+        });
+
+        history = Array.isArray(history) ? history.map(normalizeSession).filter(session => session.id) : [];
+        renderAll();
+    </script>
+</body>
+</html>
